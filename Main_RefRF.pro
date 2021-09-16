@@ -14,7 +14,8 @@ TEMPLATE = app
 include (config.pro)
 include ( /usr/local/qwt-6.1.6/features/qwt.prf )
 QT += widgets
-VERSION = 2.0.0.0
+VERSION = 3.0.0.0
+#from ver 3.0.0.0 add in git
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 INCLUDEPATH += ../
 MOC_DIR += ../moc
@@ -31,4 +32,5 @@ HEADERS  += main_refrf.h httpProcess.h\
 
 #OUT
 DESTDIR = ../$${RELEASEDIR}
+TRANSLATIONS +=rfamp_ru.ts
 
