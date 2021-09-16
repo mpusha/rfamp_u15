@@ -14,19 +14,57 @@
         <translation>Подготовка данных</translation>
     </message>
     <message>
-        <location filename="main_refrf.cpp" line="72"/>
         <source>Time step, ms</source>
-        <translation>Время шага, мс</translation>
+        <translation type="vanished">Время шага, мс</translation>
     </message>
     <message>
-        <location filename="main_refrf.cpp" line="73"/>
         <source>Coefficient of transf Vrf/Vgf</source>
-        <translation>Коэффициент преобразования</translation>
+        <translation type="vanished">Коэффициент преобразования</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="67"/>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="68"/>
+        <source>Load</source>
+        <translation>Загрузить</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="69"/>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="70"/>
+        <source>Execute</source>
+        <translation>Выполнить</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="71"/>
+        <source>Multiply</source>
+        <translation>Умножить</translation>
     </message>
     <message>
         <location filename="main_refrf.cpp" line="78"/>
         <source>Multiply coefficien for RF amplitude</source>
         <translation>Множитель для операций с ВЧ амплитудой</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="108"/>
+        <source>time, ms</source>
+        <translation>время, мс</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="108"/>
+        <source>RF, kV</source>
+        <translation>ВЧ, кВ</translation>
+    </message>
+    <message>
+        <location filename="main_refrf.cpp" line="118"/>
+        <source>Voltage in cavity</source>
+        <translation>напряжение в резонаторе</translation>
     </message>
     <message>
         <location filename="main_refrf.cpp" line="232"/>
@@ -68,6 +106,19 @@
         <location filename="main_refrf.cpp" line="495"/>
         <source>Can&apos;t write data into HW</source>
         <translation>Невозможно записать в аппаратуру</translation>
+    </message>
+</context>
+<context>
+    <name>TDataPlot</name>
+    <message>
+        <location filename="data_plot.cpp" line="39"/>
+        <source>time, ms</source>
+        <translation>время, мс</translation>
+    </message>
+    <message>
+        <location filename="data_plot.cpp" line="49"/>
+        <source>U, kV</source>
+        <translation>u, кВ</translation>
     </message>
 </context>
 <context>

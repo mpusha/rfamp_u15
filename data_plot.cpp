@@ -36,7 +36,7 @@ TDataPlot::TDataPlot(int nGr,QWidget *parent,QString title): QwtPlot(parent),num
 
   }
 
-  QwtText titleX("time, ms");
+  QwtText titleX(tr("time, ms"));
   titleX.setFont(QFont("Tahoma",14));
   titleX.setColor(qRgb(51,51,51));
   setAxisFont(QwtPlot::xBottom,QFont("Tahoma",12));
@@ -46,7 +46,7 @@ TDataPlot::TDataPlot(int nGr,QWidget *parent,QString title): QwtPlot(parent),num
   setAxisMaxMinor(QwtPlot::xBottom, 1);
 
   setAxisFont(QwtPlot::yLeft,QFont("Tahoma",12));
-  QwtText titleY("U, kV");
+  QwtText titleY(tr("U, kV"));
   titleY.setFont(QFont("Tahoma",14));
   titleY.setColor(qRgb(51,51,51));
   setAxisTitle(QwtPlot::yLeft, titleY);

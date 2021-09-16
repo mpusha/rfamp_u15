@@ -64,13 +64,13 @@ void Main_TD::create_ListWidget()
   main_layout->setMargin(5);
   main_layout->setSpacing(4);
 
-  refresh_btn=new QPushButton("Refresh",this);
-  read_btn=new QPushButton("Load",this);
-  save_btn=new QPushButton("Save",this);
-  savecsv_btn=new QPushButton("Execute",this);
-  mult_btn=new QPushButton("Multiply",this);
-  time1_Label=new QLabel(tr("Time step, ms"),this);
-  transf_Label=new QLabel(tr("Coefficient of transf Vrf/Vgf"),this);
+  refresh_btn=new QPushButton(tr("Refresh"),this);
+  read_btn=new QPushButton(tr("Load"),this);
+  save_btn=new QPushButton(tr("Save"),this);
+  savecsv_btn=new QPushButton(tr("Execute"),this);
+  mult_btn=new QPushButton(tr("Multiply"),this);
+ // time1_Label=new QLabel(tr("Time step, ms"),this);
+ // transf_Label=new QLabel(tr("Coefficient of transf Vrf/Vgf"),this);
 
   //coefTransf_Edit=new QSpinBox(this); coefTransf_Edit->setMinimum(1); coefTransf_Edit->setMaximum(10000);
 
@@ -105,7 +105,7 @@ void Main_TD::create_ListWidget()
   //QTableWidgetItem *labelItem1= new QTableWidgetItem(tr("time, us"));labelItem1->setBackgroundColor(HEADER_COLOR); tableRf->setItem(0,0,labelItem1);
   QStringList headerV;
   //headerH<<""<<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11";
-  headerV<<"time, ms"<<"RF, kV";
+  headerV<<tr("time, ms")<<tr("RF, kV");
   tableRf->setVerticalHeaderLabels(headerV);
   tableRf->horizontalHeader()->setStretchLastSection(false);
   tableRf->verticalHeader()->setStretchLastSection(false);
@@ -115,7 +115,7 @@ void Main_TD::create_ListWidget()
   //tableRf->resizeColumnsToContents();
   data_layout->addWidget(tableRf);
   QLabel graphLabel;
-  plotRF=new TDataPlot(2,&graphLabel,"Voltage in cavity");
+  plotRF=new TDataPlot(2,&graphLabel,tr("Voltage in cavity"));
   graph_layout=new QHBoxLayout;
   graph_layout->addWidget(plotRF);
   plotRF->setGridVisible(true);
