@@ -1,5 +1,4 @@
 #include "main_refrf.h"
-
 //-----------------------------------------------------------------------------
 //--- Constructor
 //-----------------------------------------------------------------------------
@@ -31,6 +30,7 @@ Main_TD::Main_TD(QWidget *parent)  : QMainWindow(parent)
   setWindowTitle(tr("Program for setup RF amplitude"));
   //slot_writeSettings();
   http->setDeviceAddress(httpAddress);
+  modifyData=false;
   slot_plotGraph();
   resize(800,600);
 }
@@ -50,6 +50,7 @@ Main_TD::~Main_TD()
 void Main_TD::keyPressEvent(QKeyEvent *event)
 {
    qDebug()<<"keyPressed"<<event->key();
+   modifyData=true;
    QWidget::keyPressEvent(event);
 }
 //-----------------------------------------------------------------------------
@@ -69,12 +70,13 @@ void Main_TD::create_ListWidget()
   save_btn=new QPushButton(tr("Save"),this);
   savecsv_btn=new QPushButton(tr("Execute"),this);
   mult_btn=new QPushButton(tr("Multiply"),this);
+  undo_btn=new QPushButton(tr("< Undo"),this);
+  undo_btn->setEnabled(false);
  // time1_Label=new QLabel(tr("Time step, ms"),this);
  // transf_Label=new QLabel(tr("Coefficient of transf Vrf/Vgf"),this);
 
   //coefTransf_Edit=new QSpinBox(this); coefTransf_Edit->setMinimum(1); coefTransf_Edit->setMaximum(10000);
 
-  interpolCB=new QCheckBox("Interpolation On/Off");
   multCoeffLabel=new QLabel(tr("Multiply coefficien for RF amplitude"));
   multCoeffSB=new QDoubleSpinBox();
   multCoeffSB->setSingleStep(0.01);
@@ -87,8 +89,8 @@ void Main_TD::create_ListWidget()
   edit_layout->addWidget(read_btn); edit_layout->addStretch(1);
   edit_layout->addWidget(save_btn); edit_layout->addStretch(1);
   edit_layout->addWidget(refresh_btn); edit_layout->addStretch(1);
+  edit_layout->addWidget(undo_btn); edit_layout->addStretch(1);
   edit_layout->addWidget(savecsv_btn); edit_layout->addStretch(1);
-  edit_layout->addWidget(interpolCB); edit_layout->addStretch(1);
   edit_layout->addWidget(multCoeffLabel); //edit_layout->addStretch(1);
   edit_layout->addWidget(multCoeffSB); edit_layout->addStretch(1);
   edit_layout->addWidget(mult_btn); edit_layout->addStretch(1);
@@ -140,6 +142,7 @@ void Main_TD::create_ListWidget()
  connect(read_btn,SIGNAL(pressed()), this, SLOT(slot_readDataFile()));
  connect(savecsv_btn,SIGNAL(pressed()), this, SLOT(slot_saveCSVDataFile()));
  connect(mult_btn,SIGNAL(pressed()), this, SLOT(slot_multData()));
+ connect(undo_btn,SIGNAL(pressed()), this, SLOT(slot_undoData()));
 }
 
 void Main_TD::putDataToTable(void)
@@ -148,7 +151,6 @@ void Main_TD::putDataToTable(void)
     itemTable[0][i]->setText(QString("%1").arg(data[0][i],4,'f',1));
     itemTable[1][i]->setText(QString("%1").arg(data[1][i],5,'f',2));
   }
-  interpolCB->setChecked(interpol);
 }
 
 void Main_TD::getDataFromTable(void)
@@ -170,7 +172,6 @@ void Main_TD::getDataFromTable(void)
     }
     if(!ok) data[1][i]=0;
   }
-  interpol=interpolCB->isChecked();
 }
 
 void Main_TD::sortData()
@@ -313,14 +314,15 @@ void Main_TD::slot_updateDateTime()
 void Main_TD::slot_readSettings(void)
 {
   QString dir_path = qApp->applicationDirPath();
-  QSettings setupSrv(dir_path+"/rf.ini", QSettings::IniFormat);
+  QSettings setup(dir_path+"/setup.ini", QSettings::IniFormat);
   bool ok;
-  httpAddress=setupSrv.value("address","192.168.10.30").toString();
-  stepTime=setupSrv.value("stepTime",0.1).toDouble(&ok); if(!ok)stepTime=0.1;
-  coefTransf=setupSrv.value("coefTransf",1.2).toDouble(&ok); if(!ok)coefTransf=1.2;
-  interpol=setupSrv.value("interpol",1).toInt(&ok); if(!ok)stepTime=0.1;
-  if(dataFN.isEmpty()) dataFN=setupSrv.value("currentFN",dir_path+"/rf.dat").toString();
-  if(dataFNCSV.isEmpty()) dataFNCSV=setupSrv.value("currentFNCSV",dir_path+"/rf.csv").toString();
+  httpAddress=setup.value("address","192.168.10.30").toString();
+  stepTime=setup.value("stepTime",0.1).toDouble(&ok); if(!ok)stepTime=0.1;
+  coefTransf=setup.value("coefTransf",1.2).toDouble(&ok); if(!ok)coefTransf=1.2;
+  interpol=setup.value("interpol",1).toInt(&ok); if(!ok) { stepTime=0.1; interpol=1;}
+  QSettings setupFn(dir_path+"/rf.ini", QSettings::IniFormat);
+  if(dataFN.isEmpty()) dataFN=setupFn.value("currentFN",dir_path+"/rf.dat").toString();
+  if(dataFNCSV.isEmpty()) dataFNCSV=setupFn.value("currentFNCSV",dir_path+"/rf.csv").toString();
 
   for(int i=0;i<ALLVECTORS;i++) { data[0][i]=i*1000;data[1][i]=0;}
   QFile file(dataFN);
@@ -347,19 +349,12 @@ void Main_TD::slot_readSettings(void)
 void Main_TD::slot_writeSettings(void)
 {
   QString dir_path = qApp->applicationDirPath();
-  QSettings *setupSrv=new QSettings(dir_path+"/rf.ini", QSettings::IniFormat);
+  QSettings *setupFn=new QSettings(dir_path+"/rf.ini", QSettings::IniFormat);
 
-  setupSrv->setValue("address",httpAddress);
-  setupSrv->setValue("stepTime",stepTime);
-  setupSrv->setValue("coefTransf",coefTransf);
+  setupFn->setValue("currentFN",dataFN);
+  setupFn->setValue("currentFNCSV",dataFNCSV);
 
-  interpol=interpolCB->isChecked();
-  setupSrv->setValue("interpol",interpol);
-
-  setupSrv->setValue("currentFN",dataFN);
-  setupSrv->setValue("currentFNCSV",dataFNCSV);
-
-  if(setupSrv) delete setupSrv;
+  if(setupFn) delete setupFn;
 
   QFile file(dataFN);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
@@ -385,12 +380,12 @@ void Main_TD::slot_writeSettings(void)
 
 void Main_TD::slot_plotGraph()
 {
- // bool interpol=true;
-
+  if(modifyData) pushData();
   getDataFromTable();
   sortData();
   putDataToTable();
   //slot_writeSettings();
+
   double t=0,dt=stepTime;
   int ng=0;// number of graph point
   xGr.clear();yGr.clear();
@@ -447,6 +442,10 @@ void Main_TD::slot_readDataFile()
     dataFN=fileName;
     slot_readSettings();
     putDataToTable();
+    modifyData=false;
+    stackDataX.clear();
+    stackDataX.clear();
+    undo_btn->setEnabled(false);
     slot_plotGraph();
     slot_writeSettings();
   }
@@ -498,6 +497,7 @@ void Main_TD::slot_alarmWriteAnswer()
 }
 void Main_TD::slot_multData()
 {
+  pushData();
   QList<QTableWidgetSelectionRange> list;
   list=tableRf->selectedRanges();
   if(list.isEmpty()){
@@ -514,4 +514,40 @@ void Main_TD::slot_multData()
   }
   putDataToTable();
   slot_plotGraph();
+}
+
+void Main_TD::slot_undoData()
+{
+  if(stackDataX.isEmpty()) return;
+  popData();
+  putDataToTable();
+  slot_plotGraph();
+  if(stackDataX.isEmpty()) {
+    undo_btn->setEnabled(false);
+  }
+}
+void Main_TD::popData(void)
+{
+  QVector <double> x,y;
+  x=stackDataX.pop();
+  y=stackDataY.pop();
+  for(int i=0;i<ALLVECTORS;i++){
+    data[0][i]=x.at(i);
+    data[1][i]=y.at(i);
+  }
+  qDebug()<<"POP"<<data[1][1];
+  modifyData=false;
+}
+void Main_TD::pushData(void)
+{
+  QVector<double> x,y;
+  for(int i=0;i<ALLVECTORS;i++){
+    x.append(data[0][i]);
+    y.append(data[1][i]);
+  }
+  qDebug()<<"Push"<<data[1][1];
+  stackDataX.push(x);
+  stackDataY.push(y);
+  undo_btn->setEnabled(true);
+  modifyData=false;
 }

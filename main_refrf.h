@@ -29,6 +29,8 @@ public:
     void putDataToTable(void);
     void getDataFromTable(void);
     void sortData(void);
+    void pushData(void);
+    void popData(void);
 
 private:
 //--- Widgets ---
@@ -36,9 +38,9 @@ private:
   QHBoxLayout *edit_layout,*data_layout,*graph_layout;
   QGroupBox *MainGroupBox;            // Main Box
   QPushButton *refresh_btn,*save_btn,*savecsv_btn,*read_btn,*mult_btn;
+  QPushButton *undo_btn;
   QLabel *space_Label,*time1_Label,*workfile_label,*transf_Label,*status_Label,*err_Label,*multCoeffLabel;
   QTableWidget *tableRf;
-  QCheckBox *interpolCB;
   QDoubleSpinBox *multCoeffSB;
   QLabel *mode_label;             // Label -> StatusBar
   QMenu *file_menu;
@@ -71,6 +73,8 @@ private:
     QString dataFN,dataFNCSV; // file name for RF (time and RF)
     double data[2][ALLVECTORS];
     QVector <double> xGr,yGr; // for plot graph
+    QStack<QVector<double>> stackDataX,stackDataY;
+    bool modifyData;
     uint32_t interpol;
     THttpProc *http;
 
@@ -85,6 +89,7 @@ public slots:
     void slot_saveCSVDataFile(void);
     void slot_alarmWriteAnswer(void);
     void slot_multData(void);
+    void slot_undoData(void);
 
 protected:
 
