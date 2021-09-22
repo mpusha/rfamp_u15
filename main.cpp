@@ -8,9 +8,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     // setup locale loc get from settings file
     QTranslator translator(0);
-    QString loc="ru";
-    //QSettings setings(QApplication::applicationDirPath()+"/setup.ini",QSettings::IniFormat) ;
-    //loc=setings.value("Locale","EN").toString();
+    QString loc;
+    QSettings setings(QApplication::applicationDirPath()+"/setup.ini",QSettings::IniFormat) ;
+    loc=setings.value("Locale","EN").toString();
     if(!loc.compare("auto",Qt::CaseInsensitive))
       translator.load(QApplication::applicationDirPath()+QString("/rfamp_")+QLocale::system().name(),".");
      else
