@@ -395,7 +395,7 @@ void Main_TD::slot_plotGraph()
     if(nPoint>ALLVECTORS-1) return;
     nPoint++;
   }
-  double y=0,dy=(double)(data[1][nPoint]-data[1][nPoint-1])*(double)stepTime/(double)(data[0][nPoint]-data[0][nPoint-1]);
+  double y=data[1][0],dy=(double)(data[1][nPoint]-data[1][nPoint-1])*(double)stepTime/(double)(data[0][nPoint]-data[0][nPoint-1]);
   while(t<data[0][ALLVECTORS-1]+0.001){
     if(t>=data[0][nPoint]-0.001) {
       nPoint++;
@@ -481,6 +481,11 @@ void Main_TD::slot_saveCSVDataFile(void)
   timer->stop();
   alarmWrTimer->start(14000);
   http->putFileOnDevice(outFileName,outFileName);
+  int err=http->getError();
+  if (err==ERR_EMPTY) {
+    err=ERR_NONE;
+    status_Label->setText(" Status: Network return empty string.");
+  }
   if(http->getError()) QMessageBox::warning(this,"error",http->getStrError());
   timer->start(2000);
 }
