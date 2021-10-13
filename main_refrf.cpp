@@ -32,7 +32,9 @@ Main_TD::Main_TD(QWidget *parent)  : QMainWindow(parent)
   http->setDeviceAddress(httpAddress);
   modifyData=false;
   slot_plotGraph();
-  resize(800,600);
+  setMinimumSize(800,600);
+  showMaximized();
+ // resize(800,600);
 }
 
 //-----------------------------------------------------------------------------
@@ -159,17 +161,19 @@ void Main_TD::getDataFromTable(void)
   double tmp;
   for(int i=0;i<ALLVECTORS;i++) {
     tmp=itemTable[0][i]->text().toDouble(&ok);
-    if(!((tmp>maxTime)||(tmp<0))){
-      tmp=(int)(tmp*10);
-      data[0][i]=tmp/10.0;
-    }
+    if(tmp<0) tmp=0;
+    else if(tmp>maxTime)
+      tmp=maxTime;
+    tmp=round(tmp*10);
+    data[0][i]=tmp/10.0;
     if(!ok) data[0][i]=0;
-    tmp=itemTable[1][i]->text().toDouble(&ok);
-    if(!((tmp>maxAmp)||(tmp<0))){
 
-      tmp=(int)(tmp*100);
-      data[1][i]=tmp/100.0;
-    }
+    tmp=itemTable[1][i]->text().toDouble(&ok);
+    if(tmp<0) tmp=0;
+    else if(tmp>maxAmp)
+      tmp=maxAmp;
+    tmp=round(tmp*100);
+    data[1][i]=tmp/100.0;
     if(!ok) data[1][i]=0;
   }
 }
@@ -214,6 +218,13 @@ void Main_TD::sortData()
         v1=data[1][j+1];
         data[1][j+1]=data[1][j];
         data[1][j]=v1;
+      }
+      if((data[0][j]==0)&&(data[0][j+1]==0)){
+        if(data[1][j]>data[1][j+1]){
+          v1=data[1][j+1];
+          data[1][j+1]=data[1][j];
+          data[1][j]=v1;
+        }
       }
     }
   }
@@ -324,7 +335,7 @@ void Main_TD::slot_readSettings(void)
   if(dataFN.isEmpty()) dataFN=setupFn.value("currentFN",dir_path+"/rf.dat").toString();
   if(dataFNCSV.isEmpty()) dataFNCSV=setupFn.value("currentFNCSV",dir_path+"/rf.csv").toString();
 
-  for(int i=0;i<ALLVECTORS;i++) { data[0][i]=i*1000;data[1][i]=0;}
+  for(int i=0;i<ALLVECTORS;i++) { data[0][i]=0;data[1][i]=0;}
   QFile file(dataFN);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
   uint32_t i=0;
@@ -334,8 +345,13 @@ void Main_TD::slot_readSettings(void)
     QStringList list=line.split(' ');
     double t,val;
     bool ok;
-    t=list.at(0).toDouble(&ok); if(!ok) t=0;
-    val=list.at(1).toDouble(&ok); if(!ok) val=0;
+    if(list.size()!=2){
+      t=0; val=0;
+    }
+    else {
+      t=list.at(0).toDouble(&ok); if(!ok) t=0;
+      val=list.at(1).toDouble(&ok); if(!ok) val=0;
+    }
     data[0][i]=t;data[1][i]=val;
     i++;
     if(i>=ALLVECTORS) break;
@@ -395,12 +411,13 @@ void Main_TD::slot_plotGraph()
     if(nPoint>ALLVECTORS-1) return;
     nPoint++;
   }
-  double y=data[1][0],dy=(double)(data[1][nPoint]-data[1][nPoint-1])*(double)stepTime/(double)(data[0][nPoint]-data[0][nPoint-1]);
+  for(int i=0;i<ALLVECTORS;i++) {qDebug()<<data[0][i]<<data[1][i]<<nPoint;}
+  double y=data[1][nPoint-1],dy=(double)(data[1][nPoint]-data[1][nPoint-1])*(double)stepTime/(double)(data[0][nPoint]-data[0][nPoint-1]);
   while(t<data[0][ALLVECTORS-1]+0.001){
     if(t>=data[0][nPoint]-0.001) {
       nPoint++;
       dy=(double)(data[1][nPoint]-data[1][nPoint-1])*(double)stepTime/(double)(data[0][nPoint]-data[0][nPoint-1]);
-    }//qDebug()<<"np"<<nPoint<<t<<data[0][nPoint]/TIMECONV+dt/100;}
+    }//qDebug()<<"np"<<nPoint<<t<<data[0][nPoint]/TIMECONV+dt/100;
     xGr.append(t);
     if(!interpol) yGr.append(data[1][nPoint-1]);
     else{
@@ -472,7 +489,7 @@ void Main_TD::slot_saveCSVDataFile(void)
     out << "t,y1e,y2e,y1o,y2o\n";
     double y;
     for(int i=0;i<xGr.size();i++){
-       y=yGr.at(i)*coefTransf;
+      y=yGr.at(i)*coefTransf;
       out.setRealNumberPrecision(5); out<<fixed<<xGr.at(i)/TIMECONV<<',';
       out.setRealNumberPrecision(1); out<<y<<','<<y<<','<<y<<','<<y<<'\n';
     }
@@ -486,7 +503,7 @@ void Main_TD::slot_saveCSVDataFile(void)
     err=ERR_NONE;
     status_Label->setText(" Status: Network return empty string.");
   }
-  if(http->getError()) QMessageBox::warning(this,"error",http->getStrError());
+  if(err) QMessageBox::warning(this,"error",http->getStrError());
   timer->start(2000);
 }
 
